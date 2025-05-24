@@ -1,0 +1,148 @@
+- 12 ---------------------------------------------
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+select ?c where {
+    ?s a h:Mestre .
+    ?s h:nome "Albert Einstein" .
+    
+    ?s h:ensina ?disciplina .
+	?c h:eEstudadoEm ?disciplina .
+}
+
+- 13 ---------------------------------------------
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+select ?o where {
+    ?c a h:Conceito .
+    ?c h:nome "Relatividade" .
+    
+    ?o a h:Obra .
+    ?o h:explica ?c .
+}   
+
+- 14 ---------------------------------------------
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+select ?d where {
+    ?t a h:TipoDeConhecimento .
+    ?t h:nome "Ciências Sociais" .
+    
+    ?d a h:Disciplina .
+    ?d h:pertenceA ?t .
+}
+
+- 15 ---------------------------------------------
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+select ?a where {
+    ?t a h:Conceito .
+    ?t h:nome "Lógica Formal" .
+    
+    ?t h:temAplicacaoEm ?a . 
+}
+
+- 16 --------------------------------------------- 
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+select ?d where {
+    ?t a h:TipoDeConhecimento .
+    ?t h:nome "Ciências Exatas" .
+    
+    ?d h:pertenceA ?t .
+}
+
+- 17 ---------------------------------------------
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+select ?m where {
+    ?p a h:PeriodoHistorico .
+    ?p h:nome "Século XIX" .
+    
+    ?m a h:Mestre .
+    ?m h:daEpoca ?p .
+}
+
+- 18 ---------------------------------------------
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+select ?a where {
+    ?c a h:Conceito .
+    ?c h:nome "Programação" .
+    
+    ?c h:eEstudadoEm ?d .
+    
+    ?a a h:Aprendiz .
+    ?a h:aprende ?d .
+}
+
+- 19 ---------------------------------------------
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+select ?d (count (?a) as ?total) where {
+    ?d a h:Disciplina .
+    
+    ?a a h:Aprendiz .
+    ?a h:aprende ?d .
+} group by ?d
+
+- 20 ---------------------------------------------
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+select ?p (count (?c) as ?total) where {
+    ?p a h:PeriodoHistorico .
+    
+    ?c h:surgeEm ?p .
+} group by ?p
+
+- 21  ---------------------------------------------
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+SELECT
+  ?c
+  (GROUP_CONCAT(DISTINCT ?titulo; SEPARATOR=", ") AS ?titulosObras)
+WHERE {
+  ?c a h:Conceito .
+  ?obra h:explica ?c .
+  ?obra h:titulo   ?titulo .
+}
+GROUP BY ?c
+
+- 22  ---------------------------------------------
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+SELECT
+  ?d
+  (GROUP_CONCAT(DISTINCT ?nome; SEPARATOR=", ") AS ?Alunos)
+WHERE {
+  ?d a h:Disciplina .
+    
+  ?a h:aprende ?d .
+  ?a h:nome ?nome .
+}
+GROUP BY ?d
+
+- 23  ---------------------------------------------
+PREFIX h: <http://rpcw.di.uminho.pt/2025/sapientia#>
+
+SELECT
+  ?escalao
+  (COUNT(?aprendiz) AS ?numAprendizes)
+WHERE {
+  ?aprendiz a h:Aprendiz ;
+             h:idade ?idade .
+
+  BIND (
+    IF(?idade >= 17 && ?idade <= 34, "[17-34]",
+    IF(?idade >= 35 && ?idade <= 44, "[35-44]",
+    IF(?idade >= 45 && ?idade <= 54, "[45-54]",
+    IF(?idade >= 55 && ?idade <= 64, "[55-64]",
+    IF(?idade >= 65 && ?idade <= 74, "[65-74]",
+    IF(?idade >= 75 && ?idade <= 100, "[75-100]",
+       "Fora de Escalões"))))))
+    AS ?escalao
+  )
+
+  FILTER(?escalao != "Fora de Escalões")
+}
+GROUP BY ?escalao
+ORDER BY ?escalao
